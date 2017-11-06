@@ -2,7 +2,6 @@ package apperror
 
 import (
 	"fmt"
-	"go/ast"
 	"reflect"
 	"regexp"
 	"strings"
@@ -11,7 +10,8 @@ import (
 )
 
 const (
-	ER_DUPLICATE_ENTRY        = 1062
+	ER_DUP_FIELDNAME          = 1060
+	ER_DUP_ENTRY              = 1062
 	ER_NOT_NULL_VIOLATION     = 1048
 	ER_CANT_DROP_FIELD_OR_KEY = 1091
 	ER_NO_REFERENCED_ROW_2    = 1452
@@ -20,14 +20,17 @@ const (
 )
 
 var (
-	columnRegexp = regexp.MustCompile("'.+?'")
+	ERR_MESSAGE_FORMAT = map[int]string{
+		ER_DUP_FIELDNAME:          "Duplicate column name '%s'",
+		ER_DUP_ENTRY:              "Duplicate entry '%s' for key %s",
+		ER_NOT_NULL_VIOLATION:     "Column '%s' cannot be null",
+		ER_CANT_DROP_FIELD_OR_KEY: "Can't DROP '%s'; check that column/key exists",
+	}
 	ERR_MESSAGES = map[int]string{
-		ER_DUPLICATE_ENTRY:        "has already been taken",
+		ER_DUP_FIELDNAME:          "has already been taken",
+		ER_DUP_ENTRY:              "has already been taken",
 		ER_NOT_NULL_VIOLATION:     "cant't be blank",
-		ER_CANT_DROP_FIELD_OR_KEY: "Can't DROP; check that column/key exists",
-		ER_NO_REFERENCED_ROW_2:    "cannot add or update a child row",
-		ER_DATA_TOO_LONG:          "data too long",
-		ER_OUT_OF_RANGE:           "out of range value",
+		ER_CANT_DROP_FIELD_OR_KEY: "check that column exists",
 	}
 )
 
@@ -44,33 +47,14 @@ func CustomError(field, message string) error {
 	return RecordError{Field: field, Message: message}
 }
 
-func MysqlError(err error, obj interface{}) error {
-	me, ok := err.(*mysql.MySQLError)
+func MysqlError(errMessage error) error {
+	me, ok := errMessage.(*mysql.MySQLError)
 	if !ok {
-		return RecordError{Field: "", Message: err.Error()}
+		return RecordError{Field: "", Message: errMessage.Error()}
 	}
-	messages := columnRegexp.FindAllString(me.Message, -1)
-	reflectType := reflect.ValueOf(obj).Type()
-	for i := 0; i < reflectType.NumField(); i++ {
-		if fieldStruct := reflectType.Field(i); ast.IsExported(fieldStruct.Name) {
-			field := structField{
-				Name:        convertCamelToLower(fieldStruct.Name),
-				Tag:         fieldStruct,
-				TagSettings: parseTagSetting(fieldStruct.Tag),
-			}
-
-			for idx := range messages {
-				if strings.Replace(messages[idx], "'", "", -1) == field.Name {
-					return RecordError{
-						Field:   field.Name,
-						Message: ERR_MESSAGES[int(me.Number)],
-					}
-				}
-			}
-		}
-	}
-
-	return RecordError{Field: "", Message: me.Error()}
+	var field string
+	fmt.Sscanf(me.Message, ERR_MESSAGE_FORMAT[int(me.Number)], &field)
+	return RecordError{Field: field, Message: ERR_MESSAGES[int(me.Number)]}
 }
 
 type structField struct {
