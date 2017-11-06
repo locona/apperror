@@ -11,21 +11,23 @@ import (
 )
 
 const (
-	ER_DUPLICATE_ENTRY     = 1062
-	ER_NOT_NULL_VIOLATION  = 1048
-	ER_NO_REFERENCED_ROW_2 = 1452
-	ER_DATA_TOO_LONG       = 1406
-	ER_OUT_OF_RANGE        = 1264
+	ER_DUPLICATE_ENTRY        = 1062
+	ER_NOT_NULL_VIOLATION     = 1048
+	ER_CANT_DROP_FIELD_OR_KEY = 1091
+	ER_NO_REFERENCED_ROW_2    = 1452
+	ER_DATA_TOO_LONG          = 1406
+	ER_OUT_OF_RANGE           = 1264
 )
 
 var (
 	columnRegexp = regexp.MustCompile("'.+?'")
 	ERR_MESSAGES = map[int]string{
-		ER_DUPLICATE_ENTRY:     "has already been taken",
-		ER_NOT_NULL_VIOLATION:  "cant't be blank",
-		ER_NO_REFERENCED_ROW_2: "cannot add or update a child row",
-		ER_DATA_TOO_LONG:       "data too long",
-		ER_OUT_OF_RANGE:        "out of range value",
+		ER_DUPLICATE_ENTRY:        "has already been taken",
+		ER_NOT_NULL_VIOLATION:     "cant't be blank",
+		ER_CANT_DROP_FIELD_OR_KEY: "Can't DROP; check that column/key exists",
+		ER_NO_REFERENCED_ROW_2:    "cannot add or update a child row",
+		ER_DATA_TOO_LONG:          "data too long",
+		ER_OUT_OF_RANGE:           "out of range value",
 	}
 )
 
