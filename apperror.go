@@ -56,8 +56,8 @@ func MysqlError(errMessage error) error {
 		return RecordError{Field: "", Message: errMessage.Error()}
 	}
 
-	in = strings.Replace(in, "'", "", -1)
-	f = strings.Replace(ERR_MESSAGE_FORMAT[int(me.Number)], "'", "", -1)
+	in := strings.Replace(me.Message, "'", "", -1)
+	f := strings.Replace(ERR_MESSAGE_FORMAT[int(me.Number)], "'", "", -1)
 	var field string
 	fmt.Sscanf(in, f, &field)
 	return RecordError{Field: field, Message: ERR_MESSAGES[int(me.Number)]}
