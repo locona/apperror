@@ -10,6 +10,7 @@ import (
 )
 
 const (
+	ER_BAD_FIELD_ERROR        = 1054
 	ER_DUP_FIELDNAME          = 1060
 	ER_DUP_ENTRY              = 1062
 	ER_NOT_NULL_VIOLATION     = 1048
@@ -21,12 +22,14 @@ const (
 
 var (
 	ERR_MESSAGE_FORMAT = map[int]string{
+		ER_BAD_FIELD_ERROR:        "Unknown column '%s' in '%s'",
 		ER_DUP_FIELDNAME:          "Duplicate column name '%s'",
 		ER_DUP_ENTRY:              "Duplicate entry '%s' for key %s",
 		ER_NOT_NULL_VIOLATION:     "Column '%s' cannot be null",
 		ER_CANT_DROP_FIELD_OR_KEY: "Can't DROP '%s'; check that column/key exists",
 	}
 	ERR_MESSAGES = map[int]string{
+		ER_BAD_FIELD_ERROR:        "unknown column",
 		ER_DUP_FIELDNAME:          "has already been taken",
 		ER_DUP_ENTRY:              "has already been taken",
 		ER_NOT_NULL_VIOLATION:     "cant't be blank",
